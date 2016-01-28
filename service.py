@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request
+from flask import Response
 import logging
 import loggly.handlers
 import json
@@ -32,12 +33,10 @@ formatter = logging.Formatter('%(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-import pdb; pdb.set_trace()
-
 
 # segment handler
 
-def _format(level, data):
+def _format(logtype, level, data):
     """Converts an HTTP POST request to a log message
 
     Args:
@@ -47,6 +46,7 @@ def _format(level, data):
         str: newly formatted log line with additional info.
     """
     # import pdb; pdb.set_trace()
+    data['type'] = logtype
     data['time'] = time.time()
     data['loggerName'] = logger.name
     data['appName'] = app.name
@@ -65,29 +65,35 @@ def syslog():
     if request.args['level'] != None:
         level = config.logging_levels[request.args['level']]
 
-    message = _format(level, request.json)
+    message = _format(syslog.__name__, level, request.json)
     logger.log(level, message)
-    return message
+    return Response(response=message,
+                    status=200,
+                    mimetype="application/json")
 
 @app.route('/pageview', methods=['POST'])
-def syslog():
+def pageview():
     """Log as page view
 
     """
     level = logging.INFO
-    message = _format(level, request.json)
+    message = _format(pageview.__name__, level, request.json)
     logger.log(level, message)
-    return message
+    return Response(response=message,
+                    status=200,
+                    mimetype="application/json")
 
 @app.route('/event', methods=['POST'])
-def syslog():
+def event():
     """Log as clientside event
 
     """
     level = logging.INFO
-    message = _format(level, request.json)
+    message = _format(event.__name__, level, request.json)
     logger.log(level, message)
-    return message
+    return Response(response=message,
+                    status=200,
+                    mimetype="application/json")
 
 
 @app.route('/tail', methods=['GET'])
@@ -98,7 +104,9 @@ def tail():
 
     proc = subprocess.Popen(["tail", "-n{num}".format(num=num), config.output_file], stdout=subprocess.PIPE)
     output = proc.stdout.read()
-    return output
+    return Response(response=output,
+                    status=200,
+                    mimetype="application/json")
 
 if __name__ == '__main__':
     app.run(host=config.host, port=config.port)
