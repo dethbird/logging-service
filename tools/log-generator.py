@@ -22,7 +22,7 @@ contexts = [
     {"banana": 3424, "pizza": 245435},
     {"pizza": 34234, "party": 3424}
 ]
-endpoints = ['syslog', 'page', 'event']
+# endpoints = ['syslog', 'page', 'event']
 
 def _get_random_log():
     endpoint = random.choice(endpoints)
@@ -66,7 +66,7 @@ def _get_random_log():
 
 for x in range(0, 3):
     (url, params, data) = _get_random_log()
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     resp = requests.post(
         url,
         params=params,

@@ -45,7 +45,7 @@ def _format(logtype, request):
     Returns:
         str: newly formatted log line with additional info.
     """
-    # import pdb; pdb.set_trace()
+    
     data = request.json
     data['logtype'] = logtype
     data['logtime'] = time.time()
