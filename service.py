@@ -108,7 +108,16 @@ def tail():
 
     proc = subprocess.Popen(["tail", "-n{num}".format(num=num), config.output_file], stdout=subprocess.PIPE)
     output = proc.stdout.read()
+    output = output.decode("utf-8").rstrip('\n').split('\n')
+    output.reverse()
+    output = '[{output}]'.format(output=','.join(output))
     return Response(response=output,
+                    status=200,
+                    mimetype="application/json")
+
+@app.route('/hello', methods=['GET'])
+def hello():
+    return Response(response=json.dumps({"host": config.host, "port": config.port, "message": "hello"}),
                     status=200,
                     mimetype="application/json")
 

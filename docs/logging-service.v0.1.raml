@@ -36,8 +36,6 @@ documentation:
         description: returns the log record string
         body:
           application/json:
-            schema: |
-              {"farts": "farts"}
             example: |
               {"farts": "farts"}
 /page:
@@ -98,10 +96,10 @@ documentation:
 /tail:
   get:
     queryParameters:
-      num:
+      n:
         default: 100
         type: integer
-        description: number of lines to tail
+        description: number of lines to tail (from cli tail options)
     description: tail the last few lines of log too http response body
     responses:
       200:
