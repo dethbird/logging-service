@@ -1,0 +1,112 @@
+#%RAML 0.8
+title: Unified Logging Service API
+version: 0.1
+baseUri: http://localhost:5008
+documentation:
+  - title: Logging Service Repo
+    content: https://github.com/dethbird/logging-service
+  - title: Tech Design form Unified Logging Service
+    content: https://docs.google.com/document/d/1E6UKAkbF0IricDFlfGEvc6mocV7VhSl9unRhtD1LUYI/edit#
+/syslog:
+  post:
+    description: |
+      post a `syslog` type log
+
+      cURL example INFO:
+      ```
+      curl -XPOST -H "Content-type: application/json" -d '{"user_id":1224,"vendor_id":4567, "more": {"pizza": "party"}}' 'http://localhost:5008/syslog?level=INFO'
+      ```
+
+    queryParameters:
+      type:
+        type: string
+        required: true
+        example: "INFO"
+        description: the syslog level in (NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    body:
+      application/json:
+        schema: |
+          {
+            "user": "{<userContext>}",
+            "message": "<message>",
+            "context": "{<contextData}>"
+          }
+    responses:
+      200:
+        description: returns the log record string
+        body:
+          application/json:
+            schema: |
+              {"farts": "farts"}
+            example: |
+              {"farts": "farts"}
+/page:
+  post:
+    description: post a `page` type log to record clientside page view
+    body:
+      application/json:
+        schema: |
+          {
+            "user": "{<userContext>}",
+            "page": {
+              "url": "<url>",
+              "query": "<queryString",
+              "...": "..."
+            },
+            "server": "...",
+            "location": "...",
+            "...": "...",
+            "context": "{<contextData}>"
+          }
+    responses:
+      200:
+        description: returns the log record string
+        body:
+          application/json:
+            example: |
+              {"farts": "farts"}
+/event:
+  post:
+    description: |
+      - POST an `event` type log to record clientside event.
+      - These will still try to map to Google Analytics and Segment, however Google Analytics only takes an `integer` for the `"value"` field, whereas we can store JSON or string.
+    body:
+      application/json:
+        schema: |
+          {
+            "user": "{<userContext>}",
+            "event": {
+              "category": "<category>",
+              "action": "<action",
+              "label": "label",
+              "value": {
+                "..." : "..."
+              }
+            },
+            "server": "...",
+            "location": "...",
+            "...": "...",
+            "context": "{<contextData}>"
+          }
+    responses:
+      200:
+        description: returns the log record string
+        body:
+          application/json:
+            example: |
+              {"farts": "farts"}
+/tail:
+  get:
+    queryParameters:
+      num:
+        default: 100
+        type: integer
+        description: number of lines to tail
+    description: tail the last few lines of log too http response body
+    responses:
+      200:
+        description: returns the requested tailed lines of syslog from the machine
+        body:
+          application/json:
+            example: |
+              {"farts": "farts"}

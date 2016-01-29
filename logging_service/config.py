@@ -13,7 +13,7 @@ logging_service_name = os.environ.get(
     'LOGGING_SERVICE_LOGGER_NAME', 'logging-service')
 
 host = os.environ.get(
-    'LOGGING_SERVICE_HOST', '127.0.0.1')
+    'LOGGING_SERVICE_HOST', 'http://127.0.0.1')
 port = os.environ.get(
     'LOGGING_SERVICE_PORT', '5000')
 

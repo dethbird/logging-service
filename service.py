@@ -36,7 +36,7 @@ logger.addHandler(ch)
 
 # segment handler
 
-def _format(logtype, level, data):
+def _format(logtype, request):
     """Converts an HTTP POST request to a log message
 
     Args:
@@ -46,10 +46,15 @@ def _format(logtype, level, data):
         str: newly formatted log line with additional info.
     """
     # import pdb; pdb.set_trace()
-    data['type'] = logtype
-    data['time'] = time.time()
+    data = request.json
+    data['logtype'] = logtype
+    data['logtime'] = time.time()
     data['loggerName'] = logger.name
     data['appName'] = app.name
+
+    if logtype == 'syslog':
+        data['level'] = request.args['level']
+
     return json.dumps(data, sort_keys=True)
 
 
@@ -64,20 +69,19 @@ def syslog():
     level = logging.DEBUG
     if request.args['level'] != None:
         level = config.logging_levels[request.args['level']]
-
-    message = _format(syslog.__name__, level, request.json)
+    message = _format(syslog.__name__, request)
     logger.log(level, message)
     return Response(response=message,
                     status=200,
                     mimetype="application/json")
 
-@app.route('/pageview', methods=['POST'])
-def pageview():
+@app.route('/page', methods=['POST'])
+def page():
     """Log as page view
 
     """
     level = logging.INFO
-    message = _format(pageview.__name__, level, request.json)
+    message = _format(page.__name__, request)
     logger.log(level, message)
     return Response(response=message,
                     status=200,
@@ -89,7 +93,7 @@ def event():
 
     """
     level = logging.INFO
-    message = _format(event.__name__, level, request.json)
+    message = _format(event.__name__, request)
     logger.log(level, message)
     return Response(response=message,
                     status=200,
