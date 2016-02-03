@@ -93,3 +93,16 @@ make logging service available as vhost by using a configuration like this in yo
     ProxyPassReverse  ^ http://localhost:514
 </VirtualHost>
 ```
+
+## ngrok
+
+```bash
+wget ngrok_2.0.19_linux_386.zip
+
+unzip ngrok_2.0.19_linux_386.zip
+
+mv ngrok /usr/bin/
+
+ngrok http 514
+
+```

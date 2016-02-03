@@ -27,11 +27,12 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 # loggly handler
-ch = loggly.handlers.HTTPSHandler(config.loggly_uri, 'POST')
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+if config.loggly_uri != "":
+    ch = loggly.handlers.HTTPSHandler(config.loggly_uri, 'POST')
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 
 # segment handler
@@ -45,15 +46,12 @@ def _format(logtype, request):
     Returns:
         str: newly formatted log line with additional info.
     """
-    
-    data = request.json
-    data['logtype'] = logtype
-    data['logtime'] = time.time()
-    data['loggerName'] = logger.name
-    data['appName'] = app.name
 
-    if logtype == 'syslog':
-        data['level'] = request.args['level']
+    data = request.json
+    data['type'] = logtype
+    data['timestamp'] = time.time()
+    data['logger'] = logger.name
+    data['app'] = app.name
 
     return json.dumps(data, sort_keys=True)
 
@@ -61,14 +59,23 @@ def _format(logtype, request):
 #create app
 app = Flask(config.app_name)
 
+@app.after_request
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = "*"
+    response.headers['Access-Control-Allow-Methods'] = "POST, GET, OPTIONS"
+    response.headers['Access-Control-Allow-Headers'] = "Content-type"
+
+    return response
+
 @app.route('/syslog', methods=['POST'])
 def syslog():
     """Log as system log
 
     """
     level = logging.DEBUG
-    if request.args['level'] != None:
-        level = config.logging_levels[request.args['level']]
+
+    if request.args['log_level'] != None:
+        level = config.logging_levels[request.args['log_level']]
     message = _format(syslog.__name__, request)
     logger.log(level, message)
     return Response(response=message,
@@ -103,8 +110,13 @@ def event():
 @app.route('/tail', methods=['GET'])
 def tail():
     num = 100
-    if request.args['n'] != None:
-        num = request.args['n']
+    grep = None
+    if request.args:
+        if request.args['n']:
+            num = request.args['n']
+        # @todo(dethbird) add grep option
+        # if request.args['grep']:
+        #     grep = request.args['grep']
 
     proc = subprocess.Popen(["tail", "-n{num}".format(num=num), config.output_file], stdout=subprocess.PIPE)
     output = proc.stdout.read()
@@ -117,9 +129,12 @@ def tail():
 
 @app.route('/hello', methods=['GET'])
 def hello():
-    return Response(response=json.dumps({"host": config.host, "port": config.port, "message": "hello"}),
-                    status=200,
-                    mimetype="application/json")
+    return Response(response=json.dumps({
+        "host": config.host,
+        "port": config.port,
+        "ngrok_url": config.ngrok_url,
+        "ngrok_monitor_url": config.ngrok_monitor_url,
+        "message": "hello"}), status=200, mimetype="application/json")
 
 if __name__ == '__main__':
     app.run(host=config.host, port=config.port)

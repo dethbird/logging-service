@@ -15,7 +15,13 @@ logging_service_name = os.environ.get(
 host = os.environ.get(
     'LOGGING_SERVICE_HOST', 'http://127.0.0.1')
 port = os.environ.get(
-    'LOGGING_SERVICE_PORT', '5000')
+    'LOGGING_SERVICE_PORT', '514')
+
+ngrok_url = os.environ.get(
+    'LOGGING_SERVICE_NGROK_URL', None)
+
+ngrok_monitor_url = os.environ.get(
+    'LOGGING_SERVICE_NGROK_MONITOR_URL', None)    
 
 logging_levels = {
     "NOTSET": logging.NOTSET,
