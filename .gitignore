@@ -3,3 +3,4 @@ env
 .env
 logging-service/__pycache__/**
 logs/*
+tools/php-demo/vendor/

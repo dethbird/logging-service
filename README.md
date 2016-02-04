@@ -82,7 +82,11 @@ curl -v -H "Content-type: application/json" 'http://localhost:514/tail?n=50'
 curl -v -H "Content-type: application/json" 'http://localhost:514/hello'
 ```
 
-## apache proxy
+## Open http://localhost to public
+
+Various ways
+
+### apache proxy
 
 make logging service available as vhost by using a configuration like this in your `vhost.conf`:
 
@@ -94,7 +98,7 @@ make logging service available as vhost by using a configuration like this in yo
 </VirtualHost>
 ```
 
-## ngrok
+### ngrok
 
 ```bash
 wget ngrok_2.0.19_linux_386.zip
@@ -105,4 +109,12 @@ mv ngrok /usr/bin/
 
 ngrok http 514
 
+```
+
+### node http server
+
+opens port to public
+
+```bash
+http-server public -p 514
 ```
